@@ -1,0 +1,70 @@
+-- ----------------------------------------------------------------
+-- dept: 부서 테이블
+-- salgrade: 급여 등급 테이블
+-- emp: 사원 테이블
+-- ----------------------------------------------------------------
+
+CREATE database IF not exists ssafydb;
+USE ssafydb;
+
+DROP TABLE IF EXISTS emp;
+DROP TABLE IF EXISTS dept;	
+DROP TABLE IF EXISTS salgrade;
+
+CREATE TABLE SALGRADE( 
+	GRADE int(2),
+	LOSAL int,
+	HISAL int,
+	CONSTRAINT PK_GRADE PRIMARY KEY(grade));
+    
+CREATE TABLE DEPT(
+	DEPTNO int(2) ,
+	DNAME VARCHAR(14) ,
+	LOC VARCHAR(13),
+	CONSTRAINT PK_DEPT PRIMARY KEY(DEPTNO)) ;
+
+CREATE TABLE EMP(
+	EMPNO int(4) ,
+	ENAME VARCHAR(10),
+	JOB VARCHAR(9),
+	MGR int(4) ,
+	HIREDATE DATETIME DEFAULT CURRENT_TIMESTAMP,
+	SAL FLOAT(7,2),
+	COMM FLOAT(7,2),
+	DEPTNO int(2), 
+    CONSTRAINT PK_EMP PRIMARY KEY(EMPNO),
+	CONSTRAINT FK_DEPTNO FOREIGN KEY(DEPTNO) REFERENCES DEPT(DEPTNO));
+
+INSERT INTO DEPT VALUES 
+(10,'ACCOUNTING','NEW YORK')
+,(20,'RESEARCH','DALLAS')
+,(30,'SALES','CHICAGO')
+,(40,'OPERATIONS','BOSTON');
+
+INSERT INTO EMP VALUES
+(7369,'SMITH','CLERK',7902,str_to_date('17-12-1998','%d-%m-%Y'),4800,NULL,20)
+,(7499,'ALLEN','SALESMAN',7698,str_to_date('20-02-1999','%d-%m-%Y'),3600,300,30)
+,(7521,'WARD','SALESMAN',7698,str_to_date('22-02-2020','%d-%m-%Y'),1250,500,30)
+,(7566,'JONES','MANAGER',7839,str_to_date('02-04-2020','%d-%m-%Y'),2975,NULL,20)
+,(7654,'MARTIN','SALESMAN',7698,str_to_date('28-09-2020','%d-%m-%Y'),1250,1400,30)
+,(7698,'BLAKE','MANAGER',7839,str_to_date('01-05-2021','%d-%m-%Y'),2850,NULL,30)
+,(7782,'CLARK','MANAGER',7839,str_to_date('09-06-2021','%d-%m-%Y'),2450,NULL,10)
+,(7788,'SCOTT','ANALYST',7566,str_to_date('13-07-2022','%d-%m-%Y'),3000,NULL,20)
+,(7839,'KING','PRESIDENT',NULL,str_to_date('17-11-2022','%d-%m-%Y'),5000,NULL,10)
+,(7844,'TURNER','SALESMAN',7698,str_to_date('08-09-2023','%d-%m-%Y'),1500,0,30)
+,(7876,'ADAMS','CLERK',7788,str_to_date('13-07-2023','%d-%m-%Y'),1100,NULL,20)
+,(7900,'JAMES_BOND','CLERK',7698,str_to_date('03-12-2024','%d-%m-%Y'),950,NULL,30)
+,(7902,'FORD','ANALYST',7566,str_to_date('03-12-2024','%d-%m-%Y'),3000,NULL,20)
+,(7934,'MILLER','CLERK',7782,str_to_date('23-01-2024','%d-%m-%Y'),1300,NULL,10)
+;
+
+INSERT INTO SALGRADE VALUES 
+(1,700,1200)
+,(2,1201,1400)
+,(3,1401,2000)
+,(4,2001,3000)
+,(5,3001,9999);
+
+COMMIT;
+
+SELECT COUNT(*) FROM emp;
