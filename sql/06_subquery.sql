@@ -69,12 +69,7 @@ select distinct e1.empno, e1.ename from emp e1 join emp e2 on (e1.empno = e2.mgr
 # 각 부서별로 최대월급여를 받는 사원이름, 월급여, 부서번호 조회
 
 
-select e1.ename, e2.sal, e2.deptno 
-from (
-	select MAX(sal) sal, deptno from emp group by deptno
-    ) e2, 
-    emp e1 
-where e1.deptno = e2.deptno and e1.sal = e2.sal;
+select e1.ename, e2.sal, e2.deptno from (select MAX(sal) sal, deptno from emp group by deptno) e2, emp e1 where e1.deptno = e2.deptno and e1.sal = e2.sal;
 
 
 -- ------------------------------------------------
@@ -83,10 +78,7 @@ where e1.deptno = e2.deptno and e1.sal = e2.sal;
 
 # 사원이름, 월급여, 부서번호, 자신의 부서의 평균 월급여와 전사원 평균 월급여 조회
 
-select e.ename, e.sal, e.deptno,
-       (select avg(sal) from emp where deptno = e.deptno) as dept_avg_sal,
-       (select avg(sal) from emp) as company_avg_sal
-from emp e;
+select e.ename, e.sal, e.deptno, (select avg(sal) from emp where deptno = e.deptno) as dept_avg_sal,(select avg(sal) from emp) as company_avg_sal from emp e;
 
 
 
@@ -97,24 +89,13 @@ from emp e;
 
 # 각 부서에서 최대급여를 받는 사원번호, 월급여, 사원이름 조회
 
-select e.empno, e.sal, e.ename
-from emp e
-join (
-    select deptno, max(sal) as max_sal
-    from emp
-    group by deptno
-) m on e.deptno = m.deptno and e.sal = m.max_sal;
+select e.empno, e.sal, e.ename from emp e join (select deptno, max(sal) as max_sal from emp group by deptno) m on e.deptno = m.deptno and e.sal = m.max_sal;
 
 
 
 # 부서별, 직무별 사원 수 피봇테이블 조회(서브쿼리(inline-VIEW) 이용버전)
 
-select deptno,
-       count(clerk) as clerk,
-       count(manager) as manager,
-       count(president) as president,
-       count(analyst) as analyst,
-       count(salesman) as salesman
+select deptno, count(clerk) as clerk, count(manager) as manager, count(president) as president, count(analyst) as analyst, count(salesman) as salesman
 from (
     select deptno,
            case when job = 'CLERK' then empno end as clerk,
@@ -130,12 +111,7 @@ group by deptno;
 
 # 부서별, 직무별 월급여 평균 피봇테이블 조회(서브쿼리(inline-VIEW) 이용버전)
 
-select deptno,
-       avg(clerk) as clerk,
-       avg(manager) as manager,
-       avg(president) as president,
-       avg(analyst) as analyst,
-       avg(salesman) as salesman
+select deptno, avg(clerk) as clerk, avg(manager) as manager, avg(president) as president, avg(analyst) as analyst, avg(salesman) as salesman
 from (
     select deptno,
            case when job = 'CLERK' then sal end as clerk,
