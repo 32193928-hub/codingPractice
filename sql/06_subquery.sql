@@ -83,6 +83,11 @@ where e1.deptno = e2.deptno and e1.sal = e2.sal;
 
 # 사원이름, 월급여, 부서번호, 자신의 부서의 평균 월급여와 전사원 평균 월급여 조회
 
+select e.ename, e.sal, e.deptno,
+       (select avg(sal) from emp where deptno = e.deptno) as dept_avg_sal,
+       (select avg(sal) from emp) as company_avg_sal
+from emp e;
+
 
 
 
@@ -92,17 +97,77 @@ where e1.deptno = e2.deptno and e1.sal = e2.sal;
 
 # 각 부서에서 최대급여를 받는 사원번호, 월급여, 사원이름 조회
 
+select e.empno, e.sal, e.ename
+from emp e
+join (
+    select deptno, max(sal) as max_sal
+    from emp
+    group by deptno
+) m on e.deptno = m.deptno and e.sal = m.max_sal;
+
 
 
 # 부서별, 직무별 사원 수 피봇테이블 조회(서브쿼리(inline-VIEW) 이용버전)
+
+select deptno,
+       count(clerk) as clerk,
+       count(manager) as manager,
+       count(president) as president,
+       count(analyst) as analyst,
+       count(salesman) as salesman
+from (
+    select deptno,
+           case when job = 'CLERK' then empno end as clerk,
+           case when job = 'MANAGER' then empno end as manager,
+           case when job = 'PRESIDENT' then empno end as president,
+           case when job = 'ANALYST' then empno end as analyst,
+           case when job = 'SALESMAN' then empno end as salesman
+    from emp
+) e
+group by deptno;
 
 
 
 # 부서별, 직무별 월급여 평균 피봇테이블 조회(서브쿼리(inline-VIEW) 이용버전)
 
+select deptno,
+       avg(clerk) as clerk,
+       avg(manager) as manager,
+       avg(president) as president,
+       avg(analyst) as analyst,
+       avg(salesman) as salesman
+from (
+    select deptno,
+           case when job = 'CLERK' then sal end as clerk,
+           case when job = 'MANAGER' then sal end as manager,
+           case when job = 'PRESIDENT' then sal end as president,
+           case when job = 'ANALYST' then sal end as analyst,
+           case when job = 'SALESMAN' then sal end as salesman
+    from emp
+) e
+group by deptno;
+
 
 
 # 부서별, 직무별 사원수 조회 피봇테이블 with 총계 조회 (서브쿼리(inline-VIEW) 이용버전)
+
+select case when grouping(deptno) = 1 then '총계' else deptno end as deptno,
+       count(clerk) as clerk,
+       count(manager) as manager,
+       count(president) as president,
+       count(analyst) as analyst,
+       count(salesman) as salesman,
+       count(*) as total
+from (
+    select deptno,
+           case when job = 'CLERK' then empno end as clerk,
+           case when job = 'MANAGER' then empno end as manager,
+           case when job = 'PRESIDENT' then empno end as president,
+           case when job = 'ANALYST' then empno end as analyst,
+           case when job = 'SALESMAN' then empno end as salesman
+    from emp
+) e
+group by deptno with rollup;
 
 
 
@@ -113,20 +178,63 @@ where e1.deptno = e2.deptno and e1.sal = e2.sal;
 
 # 주문을 했거나 이벤트를 신청한 고객번호와 주문/이벤트 타입 조회
 
+select member_id, '주문' as type
+from orders
+where member_id is not null
+union all
+select member_id, '이벤트' as type
+from event_registrations
+where member_id is not null;
+
 
 
 # 주문을 했거나 이벤트를 신청한 고객번호 중복 없이 조회
+
+select member_id
+from orders
+where member_id is not null
+union
+select member_id
+from event_registrations
+where member_id is not null;
 
 
 
 # 주문도 하고 이벤트도 신청한 고객번호 조회
 
+select distinct o.member_id
+from orders o
+where o.member_id is not null
+  and exists (
+      select 1
+      from event_registrations e
+      where e.member_id = o.member_id
+  );
+
 
 
 # 주문은 했으나 이벤트는 한번도 신청하지 않은 고객번호 조회
 
+select distinct o.member_id
+from orders o
+where o.member_id is not null
+  and not exists (
+      select 1
+      from event_registrations e
+      where e.member_id = o.member_id
+  );
+
 
 
 # 이벤트는 신청했으나 주문은 한번도 하지 않은 고객번호 조회
+
+select distinct e.member_id
+from event_registrations e
+where e.member_id is not null
+  and not exists (
+      select 1
+      from orders o
+      where o.member_id = e.member_id
+  );
 
 
